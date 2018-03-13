@@ -1,0 +1,46 @@
+version: '2.0'
+
+services:
+  config:
+    build:
+      context: .
+      dockerfile: prod_config.dockerfile
+    volumes:
+      - /etc/nginx
+  code:
+    build:
+      context: .
+      dockerfile: code.dockerfile
+    volumes:
+      - /var/www/app
+  # nginx:
+  #   build:
+  #     context: .
+  #     dockerfile: nginx.dockerfile
+  #   depends_on:
+  #     - php
+  #   volumes_from:
+  #     - config
+  #   ports:
+  #     - "8080:80"
+  #   links:
+  #     - php
+  nginx:
+    image: nginx:alpine
+    depends_on:
+      - php
+    volumes_from:
+      - config
+      - code
+    ports:
+      - "8080:80"
+    links:
+      - php
+  php:
+    build:
+      context: .
+      dockerfile: php.dockerfile
+    volumes_from:
+      - code
+    ports:
+      - "9000"

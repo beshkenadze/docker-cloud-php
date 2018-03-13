@@ -1,0 +1,32 @@
+config:
+  image: beshkenadze/docker-cloud-php:config
+  target_num_containers: 1
+  volumes:
+    - /etc/nginx
+  tags:
+    - staging
+    - web
+code:
+  image: beshkenadze/docker-cloud-php:code
+  target_num_containers: 1
+  volumes:
+    - /var/www/app
+  tags:
+    - staging
+    - web
+nginx:
+  image: nginx:alpine
+  volumes_from:
+    - config
+  ports:
+    - "8080:80"
+  links:
+    - php
+php:
+  image: php:alpine
+  target_num_containers: 1
+  volumes_from:
+    - code
+  tags:
+    - staging
+    - web
