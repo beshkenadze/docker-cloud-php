@@ -1,43 +1,54 @@
-config:
-  image: beshkenadze/docker-cloud-php:config
-  target_num_containers: 1
-  stdin_open: true
-  tty: true
-  volumes:
-    - /etc/nginx
-  tags:
-    - staging
-    - web
 code:
-  image: beshkenadze/docker-cloud-php:code
   target_num_containers: 1
+  image: 'beshkenadze/docker-cloud-php:code'
   stdin_open: true
+  tags:
+    - yourcustomdomain.4xxi.com
+    - web
   tty: true
   volumes:
     - /var/www/app
+config:
+  target_num_containers: 1
+  image: 'beshkenadze/docker-cloud-php:config'
+  stdin_open: true
   tags:
-    - staging
+    - yourcustomdomain.4xxi.com
+    - web
+  tty: true
+  volumes:
+    - /etc/nginx
+lb:
+  image: dockercloud/haproxy
+  links:
+    - nginx
+  ports:
+    - "80:80"
+  roles:
+    - global
+  tags:
+    - yourcustomdomain.4xxi.com
     - web
 nginx:
-  image: nginx:alpine
-  target_num_containers: 1
+  image: 'nginx:alpine'
+  links:
+    - php
+  ports:
+    - '8080:80'
+  tags:
+    - yourcustomdomain.4xxi.com
+    - web
   volumes_from:
     - config
     - code
-  ports:
-    - "80:80"
-  links:
-    - php
-  tags:
-    - staging
-    - web
+  environment:
+    - 'VIRTUAL_HOST=yourcustomdomain.4xxi.com'
 php:
-  image: php:fpm-alpine
-  target_num_containers: 1
+  image: 'php:fpm-alpine'
+  ports:
+    - '9000'
+  tags:
+    - yourcustomdomain.4xxi.com
+    - web
   volumes_from:
     - code
-  ports:
-    - "9000"
-  tags:
-    - staging
-    - web
