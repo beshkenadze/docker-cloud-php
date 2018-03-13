@@ -1,6 +1,8 @@
 config:
   image: beshkenadze/docker-cloud-php:config
   target_num_containers: 1
+  stdin_open: true
+  tty: true
   volumes:
     - /etc/nginx
   tags:
@@ -9,6 +11,8 @@ config:
 code:
   image: beshkenadze/docker-cloud-php:code
   target_num_containers: 1
+  stdin_open: true
+  tty: true
   volumes:
     - /var/www/app
   tags:
@@ -16,17 +20,24 @@ code:
     - web
 nginx:
   image: nginx:alpine
+  target_num_containers: 1
   volumes_from:
     - config
+    - code
   ports:
-    - "8080:80"
+    - "80:80"
   links:
     - php
+  tags:
+    - staging
+    - web
 php:
-  image: php:alpine
+  image: php:fpm-alpine
   target_num_containers: 1
   volumes_from:
     - code
+  ports:
+    - "9000"
   tags:
     - staging
     - web
